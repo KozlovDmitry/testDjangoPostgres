@@ -6,4 +6,15 @@
     Pull index.html in base_generic.html successful!
   </h3>
 
+  <p>View of Test table</p>
+  <table>
+    {% for letter in letters %}
+    <tr>
+      <td>{{ letter.id }}</td>
+      <td>{{ letter.name }}</td>
+      <td>{{ letter.date }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
 {% endblock %}
