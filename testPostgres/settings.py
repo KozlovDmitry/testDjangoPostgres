@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,8 +25,26 @@ SECRET_KEY = 'pja3ltn@a$l(oh+!pljim%^va*+!+-2f!u)8&fjqjhgle8y_yn'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+ALLOWED_HOSTS = ["*"]
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [
+    STATIC_DIR,
+]
 
-ALLOWED_HOSTS = []
+# if DEBUG:
+#     ALLOWED_HOSTS = ["*"]
+#     STATIC_DIR = os.path.join(BASE_DIR, 'static')
+#     STATICFILES_DIRS = [
+#         STATIC_DIR,
+#     ]
+# else:
+#     ALLOWED_HOSTS = ['HOST IP', 'DOMAIN NAIM', 'localhost']
+#     STATICFILES_FINDERS = (
+#         'django.contrib.staticfiles.finders.FileSystemFinder',
+#         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#     )
 
 
 # Application definition
@@ -37,6 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_results',
     'app1',
 ]
 
@@ -124,6 +144,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/static/'
-
 CELERY_BROKER_URL = 'redis://localhost:6379'
+
+CELERY_RESULT_BACKEND = 'django-db'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TASK_RESULT_EXPIRES = 7 * 86400
+CELERY_SEND_EVENTS = True
+CELERY_TIMEZONE = 'Europe/Moscow'
+# CELERY_TASK_ROUTES = {
+#     'common_worker.testFillingModel': {'queue': 'someSpecialQueue'}
+# }
+
+CELERY_BEAT_SCHEDULE = {
+    'Name_test_task': {
+        'task': 'app1.tasks.testFillingModel',
+        'schedule': crontab(minute='*/2')
+    }
+}
